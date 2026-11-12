@@ -36,7 +36,16 @@ jobs:
         run: unzip -o ZhidaoStudyAssistant-source.zip
 
       - name: Build APK
-        run: gradle --no-daemon -p ZhidaoStudyAssistant assembleDebug
+        run: |
+          cat > "$RUNNER_TEMP/align-jvm.gradle" <<'EOF'
+          allprojects {
+            tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+              sourceCompatibility = '17'
+              targetCompatibility = '17'
+            }
+          }
+          EOF
+          gradle --no-daemon --init-script "$RUNNER_TEMP/align-jvm.gradle" -p ZhidaoStudyAssistant assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
